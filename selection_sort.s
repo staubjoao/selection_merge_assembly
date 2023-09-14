@@ -1,13 +1,21 @@
 .section .data
-    vetorTxt: .asciz "vetor: "
-    scanVec: .string "%d"
-    v1: .int 0, 0, 0, 0, 0, 0, 0, 0
+    welcomeTxt: .asciz "Bem vindo, este programa realiza o Selection Sort. \nDigite 8 números para começar: "
+    vetorTxt: .asciz "Vetor: "      # String de formatação para print
+    vectorElement: .string "%d, "    # String de formatação para print
+    scanVec: .string "%d"           # String de formatação para scanf
+    cont: .int 0                    # Variável pra contar número de elemntos
+    vector: .int 0, 0, 0, 0, 0, 0, 0, 0 # Vetor inicializado com 0
 
 .section .text
 .globl main
 
 main:
-    movl $v1, %edi
+        
+    pushl $welcomeTxt
+    call printf
+    addl $4, %esp
+
+    movl $vector, %edi
     jmp insert
 
 insert:
@@ -21,13 +29,13 @@ insert:
     jl insert 
     movl $0, cont
     movl $0, %edi
-    movl $v1, %edi
+    movl $vector, %edi
     jmp printVec
     ret
 
 printVec:
     pushl (%edi)
-    pushl $vetorElemTxt
+    pushl $vectorElement
     call printf
     addl $8, %esp
     addl $4, %edi
@@ -36,5 +44,5 @@ printVec:
     jl printVec
     movl $0, cont
     movl $0, %edi
-    movl $v1, %edi
+    movl $vector, %edi
     ret
