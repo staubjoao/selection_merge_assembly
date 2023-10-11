@@ -2,8 +2,8 @@
     welcomeTxt: .asciz "Bem vindo, este programa realiza o Selection Sort. \nDigite 8 números para começar: "
     vetorTxt: .asciz "Vetor: "      # String de formatação para print
     vectorElement: .string "%d, "    # String de formatação para print
-    teste: .string "menor: %d, indice: %d\n"    
-    teste1: .string "valor: %d\n"    
+    teste: .string "\nmenor: %d, indice: %d\n"    
+    teste1: .string "teste!!\n"    
     scanVec: .string "%d"           # String de formatação para scanf
     cont: .int 0                    # Variável pra contar número de elemntos
     vector: .int 0, 0, 0, 0, 0, 0, 0, 0 # Vetor inicializado com 0
@@ -25,8 +25,9 @@ main:
     movl (%edi), %eax # Guarda o primeiro valor do vetor no eax
     movl $0, %ebx # Guarda o menor indice no ebx
     movl $0, %ecx # Guarda o indice atual no ecx
+    movl $0, cont # Indice atual
 
-    call findMin
+    jmp findMin
     ret
 
 insert:
@@ -41,7 +42,7 @@ insert:
     movl $0, cont
     movl $0, %edi
     movl $vector, %edi
-    jmp printVec
+    # jmp printVec
     ret
 
 imprimeValores:
@@ -59,18 +60,18 @@ findMin:
     je imprimeValores
     addl $4, %edi # posição edi[N] para posição edi[N+1],
     addl $1, %ecx
-    cmp (%edi), %eax
+    movl %edi, %edx
+    cmp %edx, %eax
     jle atualizaMin
-    ret
+    jmp findMin
     
 atualizaMin:
-    movl (%edi), %eax
+    movl %edi, %eax
     addl %ecx, %ebx
     addl $4, %edi
-    pushl %eax
     pushl $teste1
     call printf
-    addl $8, %esp
+    addl $4, %esp
     jmp findMin
 
 printVec:
