@@ -4,6 +4,7 @@
     num_div_area: .float 0.5
     quantidade: .int 0
     opcao: .int 0
+    teste: .asciz "teste %d"
     scan_numero: .asciz "\nEscreva um float: "
     scan_quantidade: .asciz "\nDigite a quantidade de valores que deseja realizar a operação: "
     scan_base: .asciz "\nEscreva o valor da base: "
@@ -23,16 +24,15 @@ main:
     # leitura da opção
     pushl $escolhaop
     call printf
-
     addl $4, %esp
 
     pushl $opcao
     pushl $format_int
     call scanf
+    addl $8, %esp
 
     movl opcao, %eax
 
-    # operacao
     cmp $5, %eax
     je areatriangulo
     
@@ -42,12 +42,30 @@ main:
     # leitura da quantidade
     pushl $scan_quantidade
     call printf
-
     addl $4, %esp
 
     pushl $quantidade
     pushl $format_int
     call scanf
+    addl $8, %esp
+
+    pushl %eax
+    pushl $teste
+    call printf
+    addl $8, %esp
+
+    movl quantidade, %ebx
+
+    pushl $scan_numero
+    call printf
+    addl $4, %esp
+
+    pushl $num1
+    pushl $format_float
+    call scanf
+    addl $8, %esp
+
+    flds num1
 
     cmp $1, %eax
     je soma
@@ -60,8 +78,21 @@ main:
     
     cmp $4, %eax
     je divi
-
     
+    ret
+
+leituraquantidade:
+
+
+imprimeresultado:
+    fstl (%esp)
+
+    pushl $resultado
+    call printf
+    addl $20, %esp
+
+    subl $16, %esp
+
     ret
 
 areatriangulo:
@@ -92,15 +123,7 @@ areatriangulo:
 
     fmulp
     
-    fstl (%esp)
-
-    pushl $resultado
-    call printf
-    addl $20, %esp
-
-    subl $16, %esp
-
-    ret
+    jmp imprimeresultado
 
 raizquadrada:
     pushl $scan_raiz
@@ -116,17 +139,13 @@ raizquadrada:
 
     fsqrt
 
-    fstl (%esp)
-
-    pushl $resultado
-    call printf
-    addl $20, %esp
-
-    subl $16, %esp
-
-    ret
+    jmp imprimeresultado
 
 soma:
+    subl $1, %ebx
+    cmp $0, %ebx
+    je imprimeresultado
+
     pushl $scan_numero
     call printf
 
@@ -140,51 +159,76 @@ soma:
 
     flds num1
 
-    subl $16, %esp
+    faddp
 
-    fadd %st(1), %st(0)
-    
-    fstl (%esp)
-
-    pushl $resultado
-    call printf
-    addl $20, %esp
-    ret
-
-# soma_loop:
-
+    jmp soma
 
 sub:
-    subl $16, %esp
-
-    fsub %st(1), %st(0)
-    
-    fstl (%esp)
-
-    pushl $resultado
+    push $teste
     call printf
-    addl $20, %esp
-    ret
+    addl $4, %esp
+
+    subl $1, %ebx
+    cmp $0, %ebx
+    je imprimeresultado
+
+    pushl $scan_numero
+    call printf
+
+    addl $4, %esp
+
+    pushl $num1
+    pushl $format_float
+    call scanf
+
+    addl $8, %esp
+
+    flds num1
+
+    fsubp
+
+    jmp sub
 mult:
-    subl $16, %esp
+    subl $1, %ebx
+    cmp $0, %ebx
+    je imprimeresultado
 
-    fmul %st(1), %st(0)
-    
-    fstl (%esp)
-
-    pushl $resultado
+    pushl $scan_numero
     call printf
-    addl $20, %esp
-    ret
+
+    addl $4, %esp
+
+    pushl $num1
+    pushl $format_float
+    call scanf
+
+    addl $8, %esp
+
+    flds num1
+
+    fmulp
+
+    jmp mult
 
 divi:
-    subl $16, %esp
+    subl $1, %ebx
+    cmp $0, %ebx
+    je imprimeresultado
 
-    fdiv %st(1), %st(0)
-    
-    fstl (%esp)
-
-    pushl $resultado
+    pushl $scan_numero
     call printf
-    addl $20, %esp
-    ret
+
+    addl $4, %esp
+
+    pushl $num1
+    pushl $format_float
+    call scanf
+
+    addl $8, %esp
+
+    flds num1
+
+    fdivp
+
+    jmp divi
+
