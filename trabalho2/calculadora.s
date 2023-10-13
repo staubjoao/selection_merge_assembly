@@ -4,7 +4,6 @@
     num_div_area: .float 0.5
     quantidade: .int 0
     opcao: .int 0
-    teste: .asciz "teste %d"
     scan_numero: .asciz "\nEscreva um float: "
     scan_quantidade: .asciz "\nDigite a quantidade de valores que deseja realizar a operação: "
     scan_base: .asciz "\nEscreva o valor da base: "
@@ -49,11 +48,6 @@ main:
     call scanf
     addl $8, %esp
 
-    pushl %eax
-    pushl $teste
-    call printf
-    addl $8, %esp
-
     movl quantidade, %ebx
 
     pushl $scan_numero
@@ -66,6 +60,8 @@ main:
     addl $8, %esp
 
     flds num1
+
+    movl opcao, %eax
 
     cmp $1, %eax
     je soma
@@ -164,10 +160,6 @@ soma:
     jmp soma
 
 sub:
-    push $teste
-    call printf
-    addl $4, %esp
-
     subl $1, %ebx
     cmp $0, %ebx
     je imprimeresultado
