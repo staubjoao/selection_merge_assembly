@@ -10,6 +10,7 @@
     scan_altura: .asciz "\nEscreva o valor da altura: "
     scan_raiz: .asciz "\nEscreva o valor que deseja calcular a raiz: "
     resultado: .asciz "\nResultado: %.4f\n"
+    mensagem_erro: .asciz "\nOpção fora do desejado.\n"
     escolhaop: .asciz "\nQual operação deseja fazer?\n1 - Soma\n2 - Subtração\n3 - Multiplicação\n4 - Divisão\n5 - Área do triângulo\n6 - Raiz quadrada\nSelecione: "
     format_float: .asciz "%f"
     format_int: .asciz "%d"
@@ -30,13 +31,22 @@ main:
     call scanf
     addl $8, %esp
 
+    # envia a opção para o eax
     movl opcao, %eax
+
+    # verifica se não está fora do desejado
+    cmp $7, %eax
+    jge imprimeerro
+
+    cmp $0, %eax
+    jle imprimeerro
+
+    # verifica os casos que tem um número limitado de entradas
+    cmp $6, %eax
+    je raizquadrada
 
     cmp $5, %eax
     je areatriangulo
-    
-    cmp $6, %eax
-    je raizquadrada
 
     # leitura da quantidade
     pushl $scan_quantidade
@@ -50,6 +60,11 @@ main:
 
     movl quantidade, %ebx
 
+    # se a quantiodade for igual a menor que 0
+    cmp $0, %ebx
+    jle imprimeerro
+
+    # lê o primeiro número
     pushl $scan_numero
     call printf
     addl $4, %esp
@@ -61,8 +76,11 @@ main:
 
     flds num1
 
+    subl $8, %esp
+
     movl opcao, %eax
 
+    # opçoes da operações
     cmp $1, %eax
     je soma
 
@@ -77,18 +95,18 @@ main:
     
     ret
 
-leituraquantidade:
 
+imprimeerro:
+    pushl $mensagem_erro
+    call printf
+    addl $4, %esp
+    ret
 
 imprimeresultado:
     fstl (%esp)
-
     pushl $resultado
     call printf
     addl $20, %esp
-
-    subl $16, %esp
-
     ret
 
 areatriangulo:
@@ -113,6 +131,8 @@ areatriangulo:
     flds num1
     flds num2
 
+    subl $16, %esp
+
     fmulp
 
     flds num_div_area
@@ -133,6 +153,8 @@ raizquadrada:
 
     flds num1 
 
+    subl $16, %esp
+
     fsqrt
 
     jmp imprimeresultado
@@ -144,7 +166,6 @@ soma:
 
     pushl $scan_numero
     call printf
-
     addl $4, %esp
 
     pushl $num1
@@ -154,6 +175,8 @@ soma:
     addl $8, %esp
 
     flds num1
+
+    subl $8, %esp
 
     faddp
 
@@ -166,16 +189,16 @@ sub:
 
     pushl $scan_numero
     call printf
-
     addl $4, %esp
 
     pushl $num1
     pushl $format_float
     call scanf
-
     addl $8, %esp
 
     flds num1
+
+    subl $8, %esp
 
     fsubp
 
@@ -187,16 +210,16 @@ mult:
 
     pushl $scan_numero
     call printf
-
     addl $4, %esp
 
     pushl $num1
     pushl $format_float
     call scanf
-
     addl $8, %esp
 
     flds num1
+
+    subl $8, %esp
 
     fmulp
 
@@ -209,16 +232,16 @@ divi:
 
     pushl $scan_numero
     call printf
-
     addl $4, %esp
 
     pushl $num1
     pushl $format_float
     call scanf
-
     addl $8, %esp
 
     flds num1
+
+    subl $8, %esp
 
     fdivp
 
