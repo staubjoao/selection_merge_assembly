@@ -3,13 +3,16 @@
     vetorTxt: .asciz "Vetor: "      # String de formatação para print
     vectorElement: .string "%d, "    # String de formatação para print
     teste: .string "\nmenor: %d, indice: %d\n"    
-    teste3: .string "\nedx: %d"    
+    teste3: .string "\nMin: %d, Atual: %d\n"    
 
     teste1: .string "teste!!\n"    
     scanVec: .string "%d"           # String de formatação para scanf
     cont: .int 0                    # Variável pra contar número de elemntos
     vector: .int 0, 0, 0, 0, 0, 0, 0, 0 # Vetor inicializado com 0
-    min: .int 0 # Variável para guardar o mínimo
+    minValue: .int 99999 # Variável para guardar o mínimo
+    minIdx: .int 0
+    currentValue: .int 99999
+    currentIdx: .int 0
 
 .section .text
 .globl main
@@ -22,13 +25,15 @@ main:
     movl $vector, %edi
     call insert
 
-    # inicia o eax com o menor valor atualmente, o primeiro
-    # e ebx com o indice
-    movl (%edi), %eax # Guarda o primeiro valor do vetor no eax
-    movl $0, %ebx # Guarda o menor indice no ebx
-    movl $0, %ecx # Guarda o indice atual no ecx
-    movl $0, cont # Indice atual
+    movl (%edi), %eax # Guarda o primeiro valor do vetor no min - pt1
+    movl %eax, minValue # Guarda o primeiro valor do vetor no min - pt2
 
+    movl $0, minIdx # Guarda o menor indice no ebx
+    movl $0, currentIdx # Guarda o indice atual 
+
+    movl $0, %ecx # Guarda o indice atual no ecx
+    movl $0, cont 
+    call printVec
     jmp findMin
     ret
 
@@ -48,12 +53,13 @@ insert:
     ret
 
 imprimeValores:
-    pushl %ebx
-    pushl %eax
+    pushl minIdx
+    pushl minValue
     pushl $teste
     call printf
     addl $12, %esp
     movl $0, cont
+    jmp printVec
     ret
 
 findMin:
@@ -61,31 +67,35 @@ findMin:
     cmp $8, cont 
     je imprimeValores
     addl $4, %edi # posição edi[N] para posição edi[N+1],
-    addl $1, %ecx
-    movl (%edi), %edx
+    addl $1, currentIdx
+    
+    movl (%edi), %eax
+    movl %eax, currentValue
 
     #  Imprime pra comparar
-    pushl %edx
-    pushl %eax
+    pushl currentValue
+    pushl minValue
     pushl $teste3
     call printf
     addl $12, %esp
+
     # edx é o atual, eax é o menor
-    cmp %edx, %eax
-    jle atualizaMin
+    movl currentValue, %edx
+    movl minValue, %eax
+    
+    cmp %eax, %edx 
+    jl atualizaMin
     jmp findMin
 
     
 atualizaMin:
     # tem um menor, atualiza o eax
     movl (%edi), %eax
-    
-    # Tava addl, pq não movl?
-    movl %ecx, %ebx
-    addl $4, %edi
-    pushl $teste1
-    call printf
-    addl $4, %esp
+    movl %eax, minValue
+
+    movl currentIdx, %eax
+    movl %eax, minIdx  
+    call printVec
     jmp findMin
 
 printVec:
