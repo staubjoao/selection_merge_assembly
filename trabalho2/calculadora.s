@@ -11,7 +11,7 @@
     scan_raiz: .asciz "\nEscreva o valor que deseja calcular a raiz: "
     resultado: .asciz "\nResultado: %.4f\n"
     mensagem_erro: .asciz "\nOpção fora do desejado.\n"
-    escolhaop: .asciz "\nQual operação deseja fazer?\n1 - Soma\n2 - Subtração\n3 - Multiplicação\n4 - Divisão\n5 - Área do triângulo\n6 - Raiz quadrada\nSelecione: "
+    escolha_op: .asciz "\nQual operação deseja fazer?\n1 - Soma\n2 - Subtração\n3 - Multiplicação\n4 - Divisão\n5 - Área do triângulo\n6 - Raiz quadrada\nSelecione: "
     format_float: .asciz "%f"
     format_int: .asciz "%d"
 
@@ -22,7 +22,7 @@ main:
     finit
 
     # leitura da opção
-    pushl $escolhaop
+    pushl $escolha_op
     call printf
     addl $4, %esp
 
@@ -36,17 +36,17 @@ main:
 
     # verifica se não está fora do desejado
     cmp $7, %eax
-    jge imprimeerro
+    jge imprime_erro
 
     cmp $0, %eax
-    jle imprimeerro
+    jle imprime_erro
 
     # verifica os casos que tem um número limitado de entradas
     cmp $6, %eax
-    je raizquadrada
+    je raiz_quadrada
 
     cmp $5, %eax
-    je areatriangulo
+    je area_triangulo
 
     # leitura da quantidade
     pushl $scan_quantidade
@@ -62,7 +62,7 @@ main:
 
     # se a quantiodade for igual a menor que 0
     cmp $0, %ebx
-    jle imprimeerro
+    jle imprime_erro
 
     # lê o primeiro número
     pushl $scan_numero
@@ -96,20 +96,20 @@ main:
     ret
 
 
-imprimeerro:
+imprime_erro:
     pushl $mensagem_erro
     call printf
     addl $4, %esp
     ret
 
-imprimeresultado:
+imprime_resultado:
     fstl (%esp)
     pushl $resultado
     call printf
     addl $20, %esp
     ret
 
-areatriangulo:
+area_triangulo:
     pushl $scan_altura
     call printf
     addl $4, %esp
@@ -139,9 +139,9 @@ areatriangulo:
 
     fmulp
     
-    jmp imprimeresultado
+    jmp imprime_resultado
 
-raizquadrada:
+raiz_quadrada:
     pushl $scan_raiz
     call printf
     addl $4, %esp
@@ -157,12 +157,12 @@ raizquadrada:
 
     fsqrt
 
-    jmp imprimeresultado
+    jmp imprime_resultado
 
 soma:
     subl $1, %ebx
     cmp $0, %ebx
-    je imprimeresultado
+    je imprime_resultado
 
     pushl $scan_numero
     call printf
@@ -185,7 +185,7 @@ soma:
 sub:
     subl $1, %ebx
     cmp $0, %ebx
-    je imprimeresultado
+    je imprime_resultado
 
     pushl $scan_numero
     call printf
@@ -206,7 +206,7 @@ sub:
 mult:
     subl $1, %ebx
     cmp $0, %ebx
-    je imprimeresultado
+    je imprime_resultado
 
     pushl $scan_numero
     call printf
@@ -228,7 +228,7 @@ mult:
 divi:
     subl $1, %ebx
     cmp $0, %ebx
-    je imprimeresultado
+    je imprime_resultado
 
     pushl $scan_numero
     call printf
