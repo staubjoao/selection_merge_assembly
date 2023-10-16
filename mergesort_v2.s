@@ -1,9 +1,15 @@
 .section .data
     welcomeTxt: .asciz "Bem-vindo, este programa realiza o Merge Sort. \nDigite 8 números para começar: "
 
+    aux: .int 0
     left: .int 0
     right: .int 0
     mid: .long 0
+    debug_r: .asciz "\nright: %d\n"
+    debug_l: .asciz "\left: %d\n"
+    debug_m: .asciz "\mid: %d\n"
+    teste: .asciz "\nTeste\n"
+
     vetorTxtInit: .asciz "\nVetor Inicial: "
     vetorTxtFinish: .asciz "\nVetor Ordenado: "
     vetorElemTxt: .string "%d, "
@@ -11,8 +17,8 @@
     scanVec: .string "%d"
     cont_i: .int 0              # Contador para loops (loop interno)
     cont_j: .int 0              # Contador para loops (loop externo)
-    vector: .int 0, 0, 0, 0, 0, 0, 0, 0  # Inicializa o vetor com zeros
-
+    vector: .int 8, 7, 6, 5, 4, 3, 2, 1  # Inicializa o vetor com zeros
+    cont : .int 0
 .section .text
 .globl main
 
@@ -24,32 +30,98 @@ main:
     # Insere os valores no vetor
     movl $vector, %edi
     # call insert
-
     call printVecInit
+
+
+
     # void mergeSort(int arr[], int left, int right)
     # mergeSort(arr, 0, arr_size - 1);
-    # pushl $7
-    # pushl $0
-    # pushl $vector
-    # call mergeSort
-    # addl $16, %esp
+    pushl $vector
+    pushl $0
+    pushl $7
+    call mergeSort
+    addl $12, %esp
 
     ret
 
 mergeSort:
+    cmp $3, cont
+    je finishMergeSort
+    addl $1, cont
+
     pushl %ebp
     movl %esp, %ebp
-    subl $20, %esp
-    movl 16(%ebp), %eax # right
-    movl 12(%ebp), %ebx # left
+    subl $16, %esp
+    movl 12(%ebp), %eax # right
+    movl 8(%ebp), %ebx # left
+    # left >= right
+    # imprimir 
 
-    pushl %eax
-    call vetorElemTxt
-    addl $4, %esp
+    pushl 12(%ebp)
+    pushl $debug_r
+    call printf
+    addl $8, %esp
+
+    pushl 8(%ebp)
+    pushl $debug_l
+    call printf
+    addl $8, %esp
+    
+    cmpl %ebx, %eax
+    jnl finishMergeSort
+
+
+
+
+    movl 12(%ebp), %eax # right
+    movl 8(%ebp), %ebx # left
+
+    subl %eax, %ebx # right - left
+    movl 8(%ebp), %ebx # left
+    addl %eax, %ebx # left + (left - right)
+    sarl $1, %ebx # mid
+
     pushl %ebx
-    call vetorElemTxt
-    addl $4, %esp
+    pushl $debug_m
+    call printf
+    addl $8, %esp
+
+    movl %eax, -8(%ebp)
+    subl $12, %esp
+    pushl 16(%ebp)
+    pushl -8(%ebp)
+    pushl 4(%ebp) # arr
+    pushl 8(%ebp) # left
+    pushl %ebx # mid
+    call mergeSort
+    addl $12, %esp 
+
+    addl $1, %ebx # mid + 1
+
+    pushl 4(%ebp) # arr
+    pushl %ebx # left
+    pushl 12(%ebp) # mid
+    call mergeSort
+    addl $12, %esp 
+
+
+    pushl $vector
+    pushl $0
+    pushl $7
+    call mergeSort
+    addl $12, %esp  
+
+    addl $12, %esp
+    leave
     ret
+
+finishMergeSort:
+    pushl $teste
+    call printf
+    addl $4, %esp
+    leave
+    ret
+    
 insert:
     pushl %edi
     # Entrada de dados

@@ -50,16 +50,19 @@ void mergeSort(int arr[], int left, int right)
 {
     if (left < right)
     {
+
         int mid = left + (right - left) / 2;
+        printf("left %d right %d mid %d \n", left, right, mid);
+
         mergeSort(arr, left, mid);
         mergeSort(arr, mid + 1, right);
-        merge(arr, left, mid, right);
+        // merge(arr, left, mid, right);
     }
 }
 
 int main()
 {
-    int arr[] = {12, 11, 13, 5, 6, 7};
+    int arr[] = {8, 7, 6, 5, 4, 3, 2, 1};
     int arr_size = sizeof(arr) / sizeof(arr[0]);
 
     printf("Array original:\n");

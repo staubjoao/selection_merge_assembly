@@ -9,7 +9,7 @@
     vetorElemTxt: .string "%d, "
     vetorElemF: .string "%d\n"
     scanVec: .string "%d"
-    teste: .string "teste %d\n"
+    debug: .string "\n%d\n"
     cont_i: .int 0              # Contador para loops (loop interno)
     cont_j: .int 0              # Contador para loops (loop externo)
     vector: .int 8, 7, 6, 5, 4, 3, 2, 1  # Inicializa o vetor com zeros
@@ -192,30 +192,42 @@ mergeSort:
     pushl %ebp
     movl %esp, %ebp
     subl $20, %esp
-    # direita
-    movl 16(%ebp), %eax 
-    # esquerda
-    movl 12(%ebp), %ebx
-    # subl %ebx, %eax
+    movl 16(%ebp), %eax # right
+    movl 12(%ebp), %ebx # left
+    subl %ebx, %eax
+    cmpl $2, %eax
+    jl finishMergeSort
+    movl 16(%ebp), %eax # right
+    movl 12(%ebp), %ebx # left
 
-    cmpl %eax, %ebx
-    jnl finishMergeSort
+    # antigo
+    addl %ebx, %eax
+    movl $2, %ebx
+    xor %edx, %edx
+    divl %ebx
 
-    # cmpl $2, %eax
-    # jl finishMergeSort
-    movl 16(%ebp), %eax # valor da direita
-    movl 12(%ebp), %ebx # valor da esquerda
-    addl %ebx, %eax # soma dos dois
-    sarl $1, %eax # meio fica em eax
-    movl %eax, -12(%ebp) # atualiza a esquerda com o valor do meio
-    subl $16, %esp 
+    # novo
+    # subl %eax, %ebx # right - left
+    # movl 12(%ebp), %ecx # left
+    # addl %ecx, %ebx # left + (right - left)
+    # sarl $1, %ebx # mid
+
+    pushl %ebx
+    pushl $debug
+    call printf
+    addl $8, %esp
+
+    movl 16(%ebp), %eax # right
+    movl 12(%ebp), %ebx # left
+    addl %ebx, %eax
+
+    movl %eax, -12(%ebp)
+    subl $16, %esp
     pushl 20(%ebp)
     pushl -12(%ebp)
     pushl 12(%ebp)
     pushl 8(%ebp)
-
     call mergeSort
-
     addl $16, %esp
 
     subl $16, %esp
@@ -223,9 +235,7 @@ mergeSort:
     pushl 16(%ebp)
     pushl -12(%ebp)
     pushl 8(%ebp)
-    
     call mergeSort
-    
     addl $16, %esp
 
     pushl 20(%ebp)
