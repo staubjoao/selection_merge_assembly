@@ -23,16 +23,16 @@ main:
     addl $4, %esp
     # Insere os valores no vetor
     movl $vector, %edi
-    call insert
+    # call insert
 
     call printVecInit
     # void mergeSort(int arr[], int left, int right)
     # mergeSort(arr, 0, arr_size - 1);
-    pushl $7
-    pushl $0
-    pushl $vector
-    call mergeSort
-    addl $16, %esp
+    # pushl $7
+    # pushl $0
+    # pushl $vector
+    # call mergeSort
+    # addl $16, %esp
 
     ret
 

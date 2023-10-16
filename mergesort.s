@@ -1,4 +1,3 @@
-
 .section .data
     esq: .int 0
     dir: .int 0
