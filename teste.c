@@ -1,33 +1,82 @@
-void Juntar(int vetor[], int ini, int meio, int fim, int vetAux[]) {
-    int esq = ini;
-    int dir = meio;
-    for (int i = ini; i < fim; ++i) {
-        if ((esq < meio) and ((dir >= fim) or (vetor[esq] < vetor[dir]))) {
-            vetAux[i] = vetor[esq];
-            ++esq;
+#include <stdio.h>
+
+void merge(int arr[], int left, int mid, int right)
+{
+    int i, j, k;
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+
+    int L[n1], R[n2];
+
+    for (i = 0; i < n1; i++)
+        L[i] = arr[left + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[mid + 1 + j];
+
+    i = 0;
+    j = 0;
+    k = left;
+    while (i < n1 && j < n2)
+    {
+        if (L[i] <= R[j])
+        {
+            arr[k] = L[i];
+            i++;
         }
-        else {
-            vetAux[i] = vetor[dir];
-            ++dir;
+        else
+        {
+            arr[k] = R[j];
+            j++;
         }
+        k++;
     }
-    //copiando o vetor de volta
-    for (int i = ini; i < fim; ++i) {
-        vetor[i] = vetAux[i];
+
+    while (i < n1)
+    {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2)
+    {
+        arr[k] = R[j];
+        j++;
+        k++;
     }
 }
 
-void MergeSort(int vetor[], int inicio, int fim, int vetorAux[]) {
-    if ((fim - inicio) < 2) return;
-    
-    int meio = ((inicio + fim)/2);
-    MergeSort(vetor, inicio, meio, vetorAux);
-    MergeSort(vetor, meio, fim, vetorAux);
-    Juntar(vetor, inicio, meio, fim, vetorAux);
+void mergeSort(int arr[], int left, int right)
+{
+    if (left < right)
+    {
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
 }
 
-void MergeSort(int vetor[], int tamanho) { //função que o usuario realmente chama
-    //criando vetor auxiliar
-    int vetorAux[tamanho];
-    MergeSort(vetor, 0, tamanho, vetorAux);
+int main()
+{
+    int arr[] = {12, 11, 13, 5, 6, 7};
+    int arr_size = sizeof(arr) / sizeof(arr[0]);
+
+    printf("Array original:\n");
+    for (int i = 0; i < arr_size; i++)
+    {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+
+    mergeSort(arr, 0, arr_size - 1);
+
+    printf("Array ordenado:\n");
+    for (int i = 0; i < arr_size; i++)
+    {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+
+    return 0;
 }
