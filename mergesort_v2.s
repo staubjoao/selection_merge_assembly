@@ -36,15 +36,52 @@ main:
 
     # void mergeSort(int arr[], int left, int right)
     # mergeSort(arr, 0, arr_size - 1);
-    pushl $vector
-    pushl $0
-    pushl $7
+    movl $vector, %edi
+    movl $0, %esi
+    movl $8, %edx
+    # subl $1, %edx
     call mergeSort
-    addl $12, %esp
+    # addl $12, %esp
 
     ret
-
 mergeSort:
+    # Check if left < right
+    # edx = right > esi = left
+    cmp %edx, %esi
+    jge done
+
+    pushl %esi
+    pushl $debug_r
+    call printf
+    addl $8, %esp
+
+    pushl %esi
+    pushl $debug_r
+    call printf
+    addl $8, %esp
+
+    pushl %edx
+    pushl $debug_r
+    call printf
+    addl $8, %esp
+
+    pushl %edx
+    pushl $debug_r
+    call printf
+    addl $8, %esp
+    # Calculate mid
+    movl %esi, %eax
+    addl %edx, %eax
+    sarl $1, %eax
+
+done:
+    pushl %esi
+    pushl $debug_l
+    call printf
+    addl $8, %esp
+    ret
+
+mergeSort2:
     cmp $3, cont
     je finishMergeSort
     addl $1, cont
