@@ -275,6 +275,8 @@ mergeSort:
     subl %ebx, %eax
     cmpl $2, %eax
     jl exitMerge
+
+    
     movl 16(%ebp), %eax
     movl 12(%ebp), %ebx
     addl %ebx, %eax

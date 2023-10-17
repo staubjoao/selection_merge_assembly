@@ -66,7 +66,7 @@ merge:
 #pushl $0 # ini         12
 #pushl $vector              8
 .mergeLoop:
-    cmpl 20(%ebp), %ebx
+    cmp 20(%ebp), %ebx
     jge exitmergeLoop
     movl left, %ecx
     imul $4, %ecx
@@ -88,7 +88,7 @@ merge:
     pushl left
     call .isLeftVec
     addl $24, %esp
-    cmpl $1, %eax
+    cmp $1, %eax
     je .leftVec
     movl %ebx, %ecx
     imul $4, %ecx
@@ -132,7 +132,7 @@ exitmergeLoop:
     jmp .copyVecLoop
 
 .copyVecLoop:
-    cmpl 12(%ebp), %ebx
+    cmp 12(%ebp), %ebx
     je .exitCopyVecLoop
     movl %ebx, %eax
     imul $4, %eax
@@ -162,15 +162,15 @@ exitmergeLoop:
     movl %esp, %ebp
 
     movl 8(%ebp), %eax
-    cmpl 12(%ebp), %eax
+    cmp 12(%ebp), %eax
     jge exitIsLeftVecFalse
 
     movl 16(%ebp), %eax
-    cmpl 20(%ebp), %eax
+    cmp 20(%ebp), %eax
     jge exitIsLeftVecTrue
 
     movl 24(%ebp), %eax
-    cmpl 28(%ebp), %eax
+    cmp 28(%ebp), %eax
     jl exitIsLeftVecTrue
 
     jmp exitIsLeftVecFalse
@@ -201,47 +201,51 @@ mergeSort:
     pushl %ebp
     movl %esp, %ebp
     subl $20, %esp
-
-    movl 16(%ebp), %eax # tamanho
-    movl 12(%ebp), %ebx # inicio
+    # Pega o tamanho do vetor e coloca em %eax
+    movl 16(%ebp), %eax 
+    # Pega o inicio do vetor e coloca em %ebx
+    movl 12(%ebp), %ebx     
     subl %ebx, %eax
     
-    cmpl $2, %eax
+    cmp $2, %eax
     jl finishMergeSort
 
-    movl 16(%ebp), %eax
-    movl 12(%ebp), %ebx
-    addl %ebx, %eax
-    movl $2, %ebx
-    # xor %edx, %edx
-    movl $0, %edx
-    divl %ebx
-    movl %eax, -12(%ebp)
-    subl $16, %esp
-    pushl 20(%ebp)
-    pushl -12(%ebp)
-    pushl 12(%ebp)
+    # Calcula o meio do vetor   
+    movl 16(%ebp), %eax    # Pega o tamanho do vetor e coloca em %eax
+    movl 12(%ebp), %ebx    # Pega o inicio do vetor e coloca em %ebx
+    addl %ebx, %eax        # Soma inicio com tamanho
+    sarl $1, %eax          # Da um shift de 1 bit pra direita (divide por 2)
+    movl %eax, -12(%ebp)   # Guarda o valor de %eax em -12(%ebp) (meio)
+
+
+    # Chama mergeSort para primeira metade
+    # MergeSort(vetor, inicio, meio, vetorAux);
+
+    pushl 20(%ebp) 
+    pushl -12(%ebp) 
+    pushl 12(%ebp) 
     pushl 8(%ebp)
     call mergeSort
-    addl $16, %esp
 
-    subl $16, %esp
+    # Chama mergeSort para segunda metade
     pushl 20(%ebp)
     pushl 16(%ebp)
     pushl -12(%ebp)
     pushl 8(%ebp)
     call mergeSort
-    addl $16, %esp
 
+
+    # Chama o Merge nas duas metades
     pushl 20(%ebp)
     pushl 16(%ebp)
     pushl -12(%ebp)
     pushl 12(%ebp)
     pushl 8(%ebp)
     call merge
-    addl $20, %esp
+
     leave
     ret
+
 
 finishMergeSort:
     leave
