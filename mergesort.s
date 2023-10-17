@@ -251,6 +251,11 @@ exitIsLeftVecTrue:
     popl %ebp
     ret
 
+# vetor        8 ->  20
+# vetor_aux   20 ->  16 
+# esquerda    12 ->  12
+# direita     16 ->   8
+
 exitIsLeftVecFalse:
     movl $0, %eax
     movl %ebp, %esp
@@ -292,6 +297,11 @@ mergeSort:
     pushl 8(%ebp)
     call mergeSort
     addl $16, %esp
+
+# vetor        8 ->  20
+# vetor_aux   20 ->  16 
+# esquerda    12 ->  12
+# direita     16 ->   8
 
  
     pushl 20(%ebp)

@@ -3,13 +3,15 @@
 
     left: .int 0
     right: .int 0
+    debug_l_r: .asciz "\nleft %d rigth %d\n"
+
     mid: .long 0
     vetorTxtInit: .asciz "\nVetor Inicial: "
     vetorTxtFinish: .asciz "\nVetor Ordenado: "
     vetorElemTxt: .string "%d, "
     vetorElemF: .string "%d\n"
     scanVec: .string "%d"
-    debug: .string "\n%d\n"
+    debug: .string "\nteste\n"
     cont_i: .int 0              # Contador para loops (loop interno)
     cont_j: .int 0              # Contador para loops (loop externo)
     vector: .int 8, 7, 6, 5, 4, 3, 2, 1  # Inicializa o vetor com zeros
@@ -30,10 +32,10 @@ main:
     movl vector_size, %edx
     call printVecInit
 
-    pushl $vector_aux 
-    pushl $8 
-    pushl $0 
-    pushl $vector 
+    pushl $vector_aux
+    pushl $8         
+    pushl $0
+    pushl $vector
     call mergeSort
     addl $16, %esp
 
@@ -43,11 +45,11 @@ main:
 
     ret
 
-#pushl $vector_aux           24
-#pushl $8 # fim         20
-#pushl $0 # meio        16
-#pushl $0 # ini         12
-#pushl $vector              8
+#pushl $vector_aux      24 # vetor
+#pushl $8 # fim         20 # vetor_aux
+#pushl $0 # meio        16 # esquerda
+#pushl $0 # ini         12 # meio
+#pushl $vector           8 # direita
 merge:
     pushl %ebp
     movl %esp, %ebp
@@ -56,6 +58,7 @@ merge:
     movl %ebx, left
     movl %eax, right
     jmp .mergeLoop
+    ret
 
 #pushl $vector_aux           24
 #pushl $8 # fim         20
@@ -184,43 +187,33 @@ exitIsLeftVecFalse:
     popl %ebp
     ret
 
-# vetor_aux   20
-# direita     16
-# esquerda    12
-# vetor        8
+# vetor        8 ->  20
+# vetor_aux   20 ->  16 
+# esquerda    12 ->  12
+# direita     16 ->   8
+
+#    pushl $vector_aux # 20   pushl $vector      # 20
+#    pushl $8          # 16   pushl $vector_aux  # 16
+#    pushl $0          # 12   pushl $0           # 12  
+#    pushl $vector     #  8   pushl $8           #  8
+
 mergeSort:
     pushl %ebp
     movl %esp, %ebp
     subl $20, %esp
-    movl 16(%ebp), %eax # right
-    movl 12(%ebp), %ebx # left
+    movl 16(%ebp), %eax # tamanho
+    movl 12(%ebp), %ebx # inicio
     subl %ebx, %eax
+
     cmpl $2, %eax
     jl finishMergeSort
-    movl 16(%ebp), %eax # right
-    movl 12(%ebp), %ebx # left
 
-    # antigo
+    movl 16(%ebp), %eax
+    movl 12(%ebp), %ebx
     addl %ebx, %eax
     movl $2, %ebx
     xor %edx, %edx
     divl %ebx
-
-    # novo
-    # subl %eax, %ebx # right - left
-    # movl 12(%ebp), %ecx # left
-    # addl %ecx, %ebx # left + (right - left)
-    # sarl $1, %ebx # mid
-
-    pushl %ebx
-    pushl $debug
-    call printf
-    addl $8, %esp
-
-    movl 16(%ebp), %eax # right
-    movl 12(%ebp), %ebx # left
-    addl %ebx, %eax
-
     movl %eax, -12(%ebp)
     subl $16, %esp
     pushl 20(%ebp)

@@ -1,24 +1,20 @@
 .section .data
-    num1: .float 0
-    num2: .float 0
-    maior: .asciz "\nmaior\n"
-    menor: .asciz "\nmenor\n"
+    debug: .asciz "\n%d\n"
 
 .section .text
     .global main
 
 main:
-    movl $4, %eax
-    movl $3, %ebx
+    movl $4, %eax        # Define %eax como 4
+    pushl %eax           # Salva o valor original de %eax na pilha
+    pushl $debug         # Prepara o argumento para o primeiro print
+    call printf         # Chama printf
+    addl $8, %esp        # Libera os argumentos da pilha
 
-    cmpl %ebx, %eax
-    jnl maior_teste
+    popl %eax            # Restaura o valor original de %eax
+    pushl %eax           # Coloca novamente o valor de %eax na pilha
+    pushl $debug         # Prepara o argumento para o segundo print
+    call printf         # Chama printf novamente
+    addl $8, %esp        # Libera os argumentos da pilha
     
-    
-    ret
-
-maior_teste:
-    pushl $maior
-    call printf
-    addl $4, %esp
     ret
