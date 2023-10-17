@@ -1,9 +1,9 @@
 .section .data
     welcomeTxt: .asciz "Bem-vindo, este programa realiza o Merge Sort. \nDigite 8 números para começar: "
 
-    left: .int 0
-    right: .int 0
-    debug_l_r: .asciz "\nleft %d rigth %d\n"
+    esq: .int 0
+    dir: .int 0
+    debug_l_r: .asciz "\nesq %d rigth %d\n"
 
     mid: .long 0
     vetorTxtInit: .asciz "\nVetor Inicial: "
@@ -53,51 +53,55 @@ main:
 merge:
     pushl %ebp
     movl %esp, %ebp
-    movl 12(%ebp), %ebx
-    movl 16(%ebp), %eax
-    movl %ebx, left
-    movl %eax, right
-    jmp .mergeLoop
-    ret
+    movl 12(%ebp), %ebx # Coloca o inicio do vetor em %ebx
+    movl 16(%ebp), %eax # Coloca o meio do vetor em %eax
+    movl %ebx, esq
+    movl %eax, dir
+    jmp mergeLoop
+    
 
 #pushl $vector_aux           24
 #pushl $8 # fim         20
 #pushl $0 # meio        16
 #pushl $0 # ini         12
 #pushl $vector              8
-.mergeLoop:
+mergeLoop:
     cmp 20(%ebp), %ebx
     jge exitmergeLoop
-    movl left, %ecx
+    movl esq, %ecx
     imul $4, %ecx
     movl 8(%ebp), %eax
     addl %ecx, %eax
-    movl (%eax), %ecx # vetor[left]
+    movl (%eax), %ecx # vetor[esq]
 
-    movl right, %edx
+    movl dir, %edx
     imul $4, %edx
     movl 8(%ebp), %eax
     addl %edx, %eax
-    movl (%eax), %edx # vetor[right]
+    movl (%eax), %edx # vetor[dir]
 
     pushl %edx
     pushl %ecx
     pushl 20(%ebp)
-    pushl right
+    pushl dir
     pushl 16(%ebp)
-    pushl left
-    call .isLeftVec
-    addl $24, %esp
+    pushl esq
+    call .isesqVec
+
     cmp $1, %eax
-    je .leftVec
+    je .esqVec
+
     movl %ebx, %ecx
     imul $4, %ecx
     movl 24(%ebp), %eax #vector_aux
     addl %ecx, %eax
     movl %edx, (%eax)
-    incl right
+
+    incl dir
     incl %ebx
-    jmp .mergeLoop
+
+    jmp mergeLoop
+
 
 
 exitmergeLoop:
@@ -111,15 +115,15 @@ exitmergeLoop:
     popl %ebp
     ret
 
-.leftVec:
+.esqVec:
     movl %ebx, %edx
     imul $4, %edx
     movl 24(%ebp), %eax #vector_aux
     addl %edx, %eax
     movl %ecx, (%eax)
-    incl left
+    incl esq
     incl %ebx
-    jmp .mergeLoop
+    jmp mergeLoop
 
 # vector_aux 20
 # vector    16
@@ -150,38 +154,38 @@ exitmergeLoop:
     popl %ebp
     ret
 
-# vetor[right] 28
-# vetor[left] 24
+# vetor[dir] 28
+# vetor[esq] 24
 # fim        20
-# right        16
+# dir        16
 # meio       12
-# left        8
-.isLeftVec:
-    # ((left < meio) && (right >= fim) || (vetor[left] < vetor[right])
+# esq        8
+.isesqVec:
+    # ((esq < meio) && (dir >= fim) || (vetor[esq] < vetor[dir])
     pushl %ebp
     movl %esp, %ebp
 
     movl 8(%ebp), %eax
     cmp 12(%ebp), %eax
-    jge exitIsLeftVecFalse
+    jge exitIsesqVecFalse
 
     movl 16(%ebp), %eax
     cmp 20(%ebp), %eax
-    jge exitIsLeftVecTrue
+    jge exitIsesqVecTrue
 
     movl 24(%ebp), %eax
     cmp 28(%ebp), %eax
-    jl exitIsLeftVecTrue
+    jl exitIsesqVecTrue
 
-    jmp exitIsLeftVecFalse
+    jmp exitIsesqVecFalse
 
-exitIsLeftVecTrue:
+exitIsesqVecTrue:
     movl $1, %eax
     movl %ebp, %esp
     popl %ebp
     ret
 
-exitIsLeftVecFalse:
+exitIsesqVecFalse:
     movl $0, %eax
     movl %ebp, %esp
     popl %ebp
@@ -220,28 +224,29 @@ mergeSort:
 
     # Chama mergeSort para primeira metade
     # MergeSort(vetor, inicio, meio, vetorAux);
-
-    pushl 20(%ebp) 
-    pushl -12(%ebp) 
-    pushl 12(%ebp) 
-    pushl 8(%ebp)
+    pushl 20(%ebp) # VetorAux
+    pushl -12(%ebp) # Meio
+    pushl 12(%ebp) # Inicio
+    pushl 8(%ebp) # Vetor
     call mergeSort
 
     # Chama mergeSort para segunda metade
-    pushl 20(%ebp)
-    pushl 16(%ebp)
-    pushl -12(%ebp)
-    pushl 8(%ebp)
+    # MergeSort(vetor, meio, fim, vetorAux);
+    pushl 20(%ebp) # VetorAux
+    pushl 16(%ebp) # Fim
+    pushl -12(%ebp) # Meio
+    pushl 8(%ebp) # Vetor
     call mergeSort
 
 
     # Chama o Merge nas duas metades
-    pushl 20(%ebp)
-    pushl 16(%ebp)
-    pushl -12(%ebp)
-    pushl 12(%ebp)
-    pushl 8(%ebp)
-    call merge
+    # Merge(vetor, inicio, meio, fim, vetorAux);
+    pushl 20(%ebp) # VetorAux
+    pushl 16(%ebp) # Fim
+    pushl -12(%ebp) # Meio
+    pushl 12(%ebp) # Inicio
+    pushl 8(%ebp) # Vetor
+    call merge 
 
     leave
     ret
