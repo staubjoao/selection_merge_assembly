@@ -201,10 +201,11 @@ mergeSort:
     pushl %ebp
     movl %esp, %ebp
     subl $20, %esp
+
     movl 16(%ebp), %eax # tamanho
     movl 12(%ebp), %ebx # inicio
     subl %ebx, %eax
-
+    
     cmpl $2, %eax
     jl finishMergeSort
 
@@ -212,7 +213,8 @@ mergeSort:
     movl 12(%ebp), %ebx
     addl %ebx, %eax
     movl $2, %ebx
-    xor %edx, %edx
+    # xor %edx, %edx
+    movl $0, %edx
     divl %ebx
     movl %eax, -12(%ebp)
     subl $16, %esp
