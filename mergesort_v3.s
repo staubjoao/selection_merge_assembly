@@ -32,13 +32,16 @@ main:
     movl vector_size, %edx
     call printVecInit
 
-    pushl $vector_aux
-    pushl $8         
-    pushl $0
-    pushl $vector
+    # Chamada Inicial da função
+    # MergeSort(vetor, 0, 8, vector_aux);
+    pushl $vector_aux # vetor_aux
+    pushl $8  # fim       
+    pushl $0 # inicio
+    pushl $vector # vetor
     call mergeSort
     addl $16, %esp
 
+    # Printa o vetor ordenado
     movl $vector, %edi
     movl vector_size, %edx
     call printVecFinish
@@ -66,19 +69,21 @@ merge:
 #pushl $0 # ini         12
 #pushl $vector              8
 mergeLoop:
-    cmp 20(%ebp), %ebx
+    # Compara direita/meio com o fim
+    cmp 20(%ebp), %ebx # ((dir >= fim)
     jge exitmergeLoop
-    movl esq, %ecx
-    imul $4, %ecx
-    movl 8(%ebp), %eax
-    addl %ecx, %eax
-    movl (%eax), %ecx # vetor[esq]
 
-    movl dir, %edx
-    imul $4, %edx
-    movl 8(%ebp), %eax
-    addl %edx, %eax
-    movl (%eax), %edx # vetor[dir]
+    movl esq, %ecx # Move o valor de esq para %ecx
+    imul $4, %ecx # Multiplica %ecx por 4 para obter o endereço
+    movl 8(%ebp), %eax # Carrega o endereço de vector em %eax
+    addl %ecx, %eax # Adiciona %ecx a %eax (calcula vetor[esq])
+    movl (%eax), %ecx # Move o valor para %ecx
+
+    movl dir, %edx # Move o valor de dir para %edx
+    imul $4, %edx # Multiplica %edx por 4 para obter o endereço
+    movl 8(%ebp), %eax # Carrega o endereço de vector em %eax
+    addl %edx, %eax # Adiciona %edx a %eax (calcula vetor[dir])
+    movl (%eax), %edx # Move o valor para %edx
 
     pushl %edx
     pushl %ecx
@@ -88,20 +93,18 @@ mergeLoop:
     pushl esq
     call .isesqVec
 
+
     cmp $1, %eax
     je .esqVec
-
     movl %ebx, %ecx
     imul $4, %ecx
     movl 24(%ebp), %eax #vector_aux
     addl %ecx, %eax
     movl %edx, (%eax)
-
-    incl dir
-    incl %ebx
+    addl $1, dir
+    addl $1, %ebx
 
     jmp mergeLoop
-
 
 
 exitmergeLoop:
