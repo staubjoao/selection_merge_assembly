@@ -69,36 +69,36 @@ merge:
 #pushl $0 # ini         12
 #pushl $vector              8
 mergeLoop:
-    # Compara direita/meio com o fim
-    cmp 20(%ebp), %ebx # ((dir >= fim)
+    cmp 20(%ebp), %ebx
     jge exitmergeLoop
 
     movl esq, %ecx # Move o valor de esq para %ecx
-    imul $4, %ecx # Multiplica %ecx por 4 para obter o endereço
+    shll $2, %ecx  # Bit Shift = Multiplicar %ecx por 4 para obter o endereço
     movl 8(%ebp), %eax # Carrega o endereço de vector em %eax
     addl %ecx, %eax # Adiciona %ecx a %eax (calcula vetor[esq])
     movl (%eax), %ecx # Move o valor para %ecx
 
     movl dir, %edx # Move o valor de dir para %edx
-    imul $4, %edx # Multiplica %edx por 4 para obter o endereço
+    shll $2, %edx #  Bit Shift = Multiplicar %edx por 4 para obter o endereço
     movl 8(%ebp), %eax # Carrega o endereço de vector em %eax
     addl %edx, %eax # Adiciona %edx a %eax (calcula vetor[dir])
     movl (%eax), %edx # Move o valor para %edx
 
+    # Coloca variáveis na pilha para chamar a função isEsqVec
     pushl %edx
     pushl %ecx
     pushl 20(%ebp)
     pushl dir
     pushl 16(%ebp)
     pushl esq
-    call .isesqVec
+    call isEsqVec
 
 
     cmp $1, %eax
-    je .esqVec
+    je esqVec
     movl %ebx, %ecx
     imul $4, %ecx
-    movl 24(%ebp), %eax #vector_aux
+    movl 24(%ebp), %eax # vector_aux
     addl %ecx, %eax
     movl %edx, (%eax)
     addl $1, dir
@@ -112,49 +112,50 @@ exitmergeLoop:
     pushl $vector
     pushl 20(%ebp)
     pushl 12(%ebp)
-    call .copyVec
+    call copyVec
     addl $16, %esp
     movl %ebp, %esp
-    popl %ebp
+    leave
     ret
 
-.esqVec:
+esqVec:
     movl %ebx, %edx
-    imul $4, %edx
+    shll $2, %edx
     movl 24(%ebp), %eax #vector_aux
     addl %edx, %eax
     movl %ecx, (%eax)
-    incl esq
-    incl %ebx
+    addl $1, esq
+    addl $1, %ebx
     jmp mergeLoop
+
 
 # vector_aux 20
 # vector    16
 # fim   12
 # i     8
-.copyVec:
+copyVec:
     pushl %ebp
     movl %esp, %ebp
     movl 8(%ebp), %ebx
-    jmp .copyVecLoop
+    jmp copyVecLoop
 
-.copyVecLoop:
+copyVecLoop:
     cmp 12(%ebp), %ebx
-    je .exitCopyVecLoop
+    je exitCopyVecLoop
     movl %ebx, %eax
-    imul $4, %eax
+    shll $2, %eax
     movl 20(%ebp), %ecx # vector_aux
     movl 16(%ebp), %edx # vector
     addl %eax, %ecx
     addl %eax, %edx
     movl (%ecx), %ecx
     movl %ecx, (%edx)
-    incl %ebx
-    jmp .copyVecLoop
+    addl $1, %ebx
+    jmp copyVecLoop
 
-.exitCopyVecLoop:
+exitCopyVecLoop:
     movl %ebp, %esp
-    popl %ebp
+    leave
     ret
 
 # vetor[dir] 28
@@ -163,35 +164,30 @@ exitmergeLoop:
 # dir        16
 # meio       12
 # esq        8
-.isesqVec:
-    # ((esq < meio) && (dir >= fim) || (vetor[esq] < vetor[dir])
+isEsqVec:
     pushl %ebp
     movl %esp, %ebp
 
     movl 8(%ebp), %eax
     cmp 12(%ebp), %eax
-    jge exitIsesqVecFalse
+    jae exitIsesqVecFalse
 
     movl 16(%ebp), %eax
     cmp 20(%ebp), %eax
-    jge exitIsesqVecTrue
+    jae exitIsesqVecTrue
 
     movl 24(%ebp), %eax
     cmp 28(%ebp), %eax
-    jl exitIsesqVecTrue
-
-    jmp exitIsesqVecFalse
+    jge exitIsesqVecFalse
 
 exitIsesqVecTrue:
     movl $1, %eax
-    movl %ebp, %esp
-    popl %ebp
+    leave # Restora a pilha
     ret
 
 exitIsesqVecFalse:
     movl $0, %eax
-    movl %ebp, %esp
-    popl %ebp
+    leave # Restora a pilha
     ret
 
 # vetor        8 ->  20
