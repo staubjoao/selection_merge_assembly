@@ -14,7 +14,7 @@
     debug: .string "\nteste %d\n"
     cont_i: .int 0              # Contador para loops (loop interno)
     cont_j: .int 0              # Contador para loops (loop externo)
-    vector: .int 8, 7, 6, 5, 4, 3, 2, 1  # Inicializa o vetor com zeros
+    vector: .int 0, 0, 0, 0, 0, 0, 0, 0  # Inicializa o vetor com zeros
     vector_aux: .int 0, 0, 0, 0, 0, 0, 0, 0
 
 .section .text
@@ -25,6 +25,9 @@ main:
     pushl $welcomeTxt
     call printf
     addl $4, %esp
+    # Insere os valores no vetor
+    movl $vector, %edi
+    call insert
 
     # Printa vetor inicial
     movl $vector, %edi
@@ -45,11 +48,29 @@ main:
 
     ret
 
-#pushl $vector_aux      24 # vetor
-#pushl $8 # fim         20 # vetor_aux
-#pushl $0 # meio        16 # esquerda
-#pushl $0 # ini         12 # meio
-#pushl $vector           8 # direita
+insert:
+    pushl %edi
+    # Entrada de dados
+    pushl $scanVec
+    call scanf 
+    addl $8, %esp
+    # i + 1
+    addl $1, cont_i
+    addl $4, %edi # posição edi[N] para posição edi[N+1]
+    # i < 8
+    cmp $8, cont_i
+    jl insert
+    # Zera o contador e volta pra edi[0]
+    movl $0, cont_i
+    movl $0, %edi
+    movl $vector, %edi
+    ret
+
+# vector_aux  24 
+# direita     20 
+# meio        16 
+# esquerda    12 
+# vector       8
 merge:
     pushl %ebp
     movl %esp, %ebp
@@ -60,15 +81,15 @@ merge:
     jmp mergeLoop
     
 
-#pushl $vector_aux           24
-#pushl $8 # fim         20
-#pushl $0 # meio        16
-#pushl $0 # ini         12
-#pushl $vector              8
+# vector_aux  24 
+# direita     20 
+# meio        16 
+# esquerda    12 
+# vector       8
 mergeLoop:
     # For (i = ini; i < 8; i++)
     cmp $8, %ebx
-    jge exitmergeLoop
+    jge finishmergeLoop
 
     movl esq, %ecx # Move o valor de esq para %ecx
     shll $2, %ecx  # Bit Shift = Multiplicar %ecx por 4 para obter o endereço
@@ -82,122 +103,128 @@ mergeLoop:
     addl %edx, %eax # Adiciona %edx a %eax (calcula vetor[dir])
     movl (%eax), %edx # Move o valor para %edx
 
-    # Coloca variáveis na pilha para chamar a função isEsqVec
+    # Coloca variáveis na pilha para chamar a função mergeIf
     pushl %edx # vetor[dir]
     pushl %ecx # vetor[esq]
     pushl 20(%ebp) # fim
     pushl dir # dir
     pushl 16(%ebp) # meio
     pushl esq # esq
-    call isEsqVec
+    call mergeIf
 
-
+    # O If foi True, tem que fazer troca
     cmp $1, %eax
-    je esqVec
+    je if
+
+    # Caiu no Else
+    cmp $0, %eax
+    je else 
+
+# Parte do If
+# vetAux[i] = vetor[esq];
+# ++esq;
+if:
+    movl %ebx, %edx
+    shll $2, %edx 
+    movl 24(%ebp), %eax 
+    addl %edx, %eax
+    movl %ecx, (%eax)
+    addl $1, esq 
+    addl $1, %ebx
+    jmp mergeLoop
+
+# Parte do Else    
+# etAux[i] = vetor[dir];
+# ++dir;
+ else:      
     movl %ebx, %ecx
     imul $4, %ecx
-    movl 24(%ebp), %eax # vector_aux
+    movl 24(%ebp), %eax 
     addl %ecx, %eax
     movl %edx, (%eax)
     addl $1, dir
     addl $1, %ebx
-
     jmp mergeLoop
 
 
-exitmergeLoop:
-    pushl $vector_aux
-    pushl $vector
-    pushl 20(%ebp)
-    pushl 12(%ebp)
+# Saiu do loop tem que copiar o vetor auxiliar para o vetor original
+finishmergeLoop:
+    pushl $vector_aux # vetor_aux
+    pushl $vector # vetor
+    pushl 20(%ebp) # fim
+    pushl 12(%ebp) # Tamanho
     call copyVec
-    addl $16, %esp
-    movl %ebp, %esp
     leave
     ret
 
-esqVec:
-    movl %ebx, %edx
-    shll $2, %edx
-    movl 24(%ebp), %eax #vector_aux
-    addl %edx, %eax
-    movl %ecx, (%eax)
-    addl $1, esq
-    addl $1, %ebx
-    jmp mergeLoop
-
-
-# vector_aux 20
-# vector    16
-# fim   12
-# i     8
+# vector_aux  20
+# vector      16
+# fim         12
+# cout            8
 copyVec:
     pushl %ebp
     movl %esp, %ebp
-    movl 8(%ebp), %ebx
+    movl 8(%ebp), %ebx 
     jmp copyVecLoop
 
 copyVecLoop:
-    cmp 12(%ebp), %ebx
-    je exitCopyVecLoop
-    movl %ebx, %eax
-    shll $2, %eax
-    movl 20(%ebp), %ecx # vector_aux
-    movl 16(%ebp), %edx # vector
-    addl %eax, %ecx
-    addl %eax, %edx
-    movl (%ecx), %ecx
-    movl %ecx, (%edx)
+    cmp $8, %ebx
+    je finishCopyVecLoop # Copiou tudo, sai do loop
+    movl %ebx, %eax # Salva o valor de count em %eax
+    shll $2, %eax # Bit shift para salvar o endereço no eax
+    movl 20(%ebp), %ecx # Coloca vetor_aux[i] em %ecx	
+    movl 16(%ebp), %edx # Coloca vetor[i] em %edx	
+    addl %eax, %ecx # Soma com a posição do endereço
+    addl %eax, %edx # Soma com a posição do endereço
+    # ----- SWAP -------
+    movl (%ecx), %ecx # Move o valor de vetor_aux[i] para %ecx
+    movl %ecx, (%edx) # Move o valor de %ecx para vetor[i]
+    # ------------------
     addl $1, %ebx
     jmp copyVecLoop
 
-exitCopyVecLoop:
-    movl %ebp, %esp
+finishCopyVecLoop:
     leave
     ret
 
-# vetor[dir] 28
-# vetor[esq] 24
-# fim        20
-# dir        16
-# meio       12
-# esq        8
-isEsqVec:
+# vector[direita]  28
+# vector[esquerda] 24
+# fim              20
+# direita          16
+# meio             12
+# esquerda          8
+mergeIf:
     pushl %ebp
     movl %esp, %ebp
-
+    # Verifica se esq >= meio
     movl 8(%ebp), %eax
     cmp 12(%ebp), %eax
-    jae exitIsesqVecFalse
+    jae finishmergeIfFalse    
 
+    # Verifica se dir >= fim
     movl 16(%ebp), %eax
     cmp 20(%ebp), %eax
-    jae exitIsesqVecTrue
+    jae finishmergeIfTrue
 
+    # Verifica se vetor[dir] >= vetor[esq]
     movl 24(%ebp), %eax
     cmp 28(%ebp), %eax
-    jge exitIsesqVecFalse
+    jge finishmergeIfFalse
 
-exitIsesqVecTrue:
+finishmergeIfTrue:
     movl $1, %eax
     leave # Restora a pilha
     ret
 
-exitIsesqVecFalse:
+finishmergeIfFalse:
     movl $0, %eax
     leave # Restora a pilha
     ret
 
-# vetor        8 ->  20
-# vetor_aux   20 ->  16 
-# esquerda    12 ->  12
-# direita     16 ->   8
-
-#    pushl $vector_aux # 20   pushl $vector      # 20
-#    pushl $8          # 16   pushl $vector_aux  # 16
-#    pushl $0          # 12   pushl $0           # 12  
-#    pushl $vector     #  8   pushl $8           #  8
-
+# vector_aux 20
+# direita 16
+# esquerda 12
+# vector 8
 mergeSort:
     pushl %ebp
     movl %esp, %ebp
