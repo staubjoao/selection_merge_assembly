@@ -11,12 +11,11 @@
     vetorElemTxt: .string "%d, "
     vetorElemF: .string "%d\n"
     scanVec: .string "%d"
-    debug: .string "\nteste\n"
+    debug: .string "\nteste %d\n"
     cont_i: .int 0              # Contador para loops (loop interno)
     cont_j: .int 0              # Contador para loops (loop externo)
     vector: .int 8, 7, 6, 5, 4, 3, 2, 1  # Inicializa o vetor com zeros
     vector_aux: .int 0, 0, 0, 0, 0, 0, 0, 0
-    vector_size: .int 8
 
 .section .text
 .globl main
@@ -27,9 +26,8 @@ main:
     call printf
     addl $4, %esp
 
-    # Insere os valores no vetor
+    # Printa vetor inicial
     movl $vector, %edi
-    movl vector_size, %edx
     call printVecInit
 
     # Chamada Inicial da função
@@ -43,7 +41,6 @@ main:
 
     # Printa o vetor ordenado
     movl $vector, %edi
-    movl vector_size, %edx
     call printVecFinish
 
     ret
@@ -69,7 +66,8 @@ merge:
 #pushl $0 # ini         12
 #pushl $vector              8
 mergeLoop:
-    cmp 20(%ebp), %ebx
+    # For (i = ini; i < 8; i++)
+    cmp $8, %ebx
     jge exitmergeLoop
 
     movl esq, %ecx # Move o valor de esq para %ecx
@@ -85,9 +83,9 @@ mergeLoop:
     movl (%eax), %edx # Move o valor para %edx
 
     # Coloca variáveis na pilha para chamar a função isEsqVec
-    pushl %edx
-    pushl %ecx
-    pushl 20(%ebp)
+    pushl %edx # dir
+    pushl %ecx # esq
+    pushl 20(%ebp) # fim
     pushl dir
     pushl 16(%ebp)
     pushl esq
