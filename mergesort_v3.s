@@ -83,12 +83,12 @@ mergeLoop:
     movl (%eax), %edx # Move o valor para %edx
 
     # Coloca variáveis na pilha para chamar a função isEsqVec
-    pushl %edx # dir
-    pushl %ecx # esq
+    pushl %edx # vetor[dir]
+    pushl %ecx # vetor[esq]
     pushl 20(%ebp) # fim
-    pushl dir
-    pushl 16(%ebp)
-    pushl esq
+    pushl dir # dir
+    pushl 16(%ebp) # meio
+    pushl esq # esq
     call isEsqVec
 
 
